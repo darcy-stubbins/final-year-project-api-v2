@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  php:
+    build:
+      dockerfile: php-dockerfile
+    volumes:
+      - './data/php:/var/www/html' # This line maps your local php-files directory to the virtual /var/www/html directory in the docker container (rename php-files directory locally and here to be whatever you want them to be)
+    depends_on:
+      - db
+  db:
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'craftingapp'
+      MYSQL_USER: 'darcy'
+      MYSQL_PASSWORD: 'password'
+    volumes:
+      - ./mysql_data:/var/lib/mysql # This line maps your local mysql_data directory to the virtual /var/lib/mysql directory in the docker container (rename mysql_data directory locally and here to whatever you want them to be)
+  nginx:
+    image: nginx:1.15-alpine
+    restart: unless-stopped
+    volumes:
+      - ./data/php:/var/www/html # This is another reference to line 8 so if you rename php-files directory to something else, you should also update it here
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    depends_on:
+      - php
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
