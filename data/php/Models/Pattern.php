@@ -11,10 +11,11 @@ class Pattern extends Model
     {
         return 'im firing babyyyyyy';
     }
+
     //function to add a pattern to the db 
     public function create(array $data)
     {
-        $stmt = $this->db->prepare("INSERT INTO patterns (pattern_name, pdf_path) VALUES (?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO patterns (pattern_name, user_id, pdf_path) VALUES (?, ?, ?)");
         $result = $stmt->execute(array_values($data));
 
         return json_encode([
@@ -25,7 +26,7 @@ class Pattern extends Model
     //function to show all patterns in the db 
     public function showAll()
     {
-        $stmt = $this->db->prepare("SELECT * FROM patterns");
+        $stmt = $this->db->prepare("SELECT p.*, u.user_name FROM patterns as p JOIN users as u ON p.user_id = u.id");
         $stmt->execute();
         $pattern = $stmt->fetchAll();
 

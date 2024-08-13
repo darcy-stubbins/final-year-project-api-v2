@@ -58,7 +58,7 @@ class User extends Model
     //function to return list of users saved patterns 
     public function getSavedPatterns(int $id, array $data)
     {
-        $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path FROM patterns as p JOIN saved ON p.id = saved.pattern_id WHERE saved.user_id=?");
+        $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path, u.user_name FROM patterns as p JOIN users as u ON u.id = p.user_id JOIN saved as s ON p.id = s.pattern_id WHERE s.user_id=?");
         $stmt->execute([$id]);
         $saved = $stmt->fetchAll();
 
