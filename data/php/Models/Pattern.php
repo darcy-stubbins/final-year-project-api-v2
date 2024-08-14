@@ -13,7 +13,7 @@ class Pattern extends Model
     }
 
     //function to add a pattern to the db 
-    public function create(array $data)
+    public function createPattern(array $data)
     {
         $stmt = $this->db->prepare("INSERT INTO patterns (pattern_name, user_id, pdf_path) VALUES (?, ?, ?)");
         $result = $stmt->execute(array_values($data));
@@ -24,7 +24,7 @@ class Pattern extends Model
     }
 
     //function to show all patterns in the db 
-    public function showAll()
+    public function showAllPatterns()
     {
         $stmt = $this->db->prepare("SELECT p.*, u.user_name FROM patterns as p JOIN users as u ON p.user_id = u.id");
         $stmt->execute();
@@ -49,7 +49,7 @@ class Pattern extends Model
     //function to show comments on a pattern 
     public function getPatternComments(int $id, array $data)
     {
-        $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c JOIN users as u ON c.user_id = u.id WHERE c.pattern_id =?");
+        $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c JOIN users as u ON c.user_id = u.id WHERE c.pattern_id=?");
         $stmt->execute([$id]);
         $comments = $stmt->fetchAll();
 
@@ -66,6 +66,19 @@ class Pattern extends Model
 
         return json_encode([
             'pattern liked' => $result
+        ]);
+    }
+
+    //NEED TO MAKE THIS TAKE USER INTO ACCOUNT 
+
+    //function to remove a like on a pattern 
+    public function removePatternLike(int $id)
+    {
+        $stmt = $this->db->prepare("DELETE FROM likes WHERE pattern_id=?");
+        $result = $stmt->execute([$id]);
+
+        return json_encode([
+            'pattern unliked' => $result
         ]);
     }
 }

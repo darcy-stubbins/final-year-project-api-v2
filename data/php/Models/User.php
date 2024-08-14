@@ -8,7 +8,7 @@ use PDO;
 class User extends Model
 {
     //function to add an account to the db 
-    public function create(array $data)
+    public function createUser(array $data)
     {
         //hashing the password 
         $data['user_password'] = password_hash($data['user_password'], PASSWORD_DEFAULT);
@@ -22,7 +22,7 @@ class User extends Model
     }
 
     //function to show a user by id 
-    public function show(int $id)
+    public function showUser(int $id)
     {
         $stmt = $this->db->prepare("SELECT u.user_name, u.user_email, u.user_password FROM users as u WHERE id=?");
         $stmt->execute([$id]);
@@ -34,7 +34,7 @@ class User extends Model
     }
 
     //function to remove an account from the db 
-    public function delete(array $data)
+    public function deleteUser(array $data)
     {
         $stmt = $this->db->prepare("DELETE FROM users WHERE id=?");
         $result = $stmt->execute(array_values($data));
@@ -65,5 +65,16 @@ class User extends Model
         return json_encode(
             $saved
         );
+    }
+
+    //function to add a friend 
+    public function postUserFriend(array $data)
+    {
+        $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
+        $result = $stmt->execute(array_values($data));
+
+        return json_encode([
+            'friend added' => $result
+        ]);
     }
 }
