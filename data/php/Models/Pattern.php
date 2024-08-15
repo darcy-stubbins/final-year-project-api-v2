@@ -69,8 +69,6 @@ class Pattern extends Model
         ]);
     }
 
-    //NEED TO MAKE THIS TAKE USER INTO ACCOUNT 
-
     //function to remove a like on a pattern 
     public function removePatternLike(array $data)
     {
@@ -80,5 +78,19 @@ class Pattern extends Model
         return json_encode([
             'pattern unliked' => $result
         ]);
+    }
+
+    //creating pattern search functionality for the searh bar
+    public function search(array $data)
+    {
+        $data['search_term'] = '%' . $data['search_term'] . '%';
+        $stmt = $this->db->prepare("SELECT * FROM patterns WHERE pattern_name LIKE ?");
+        $result = $stmt->execute(array_values($data));
+        $searchResult = $stmt->fetchAll();
+
+
+        return json_encode(
+            $searchResult
+        );
     }
 }
