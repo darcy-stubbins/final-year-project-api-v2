@@ -47,7 +47,7 @@ class Pattern extends Model
     }
 
     //function to show comments on a pattern 
-    public function getPatternComments(int $id, array $data)
+    public function getPatternComments(int $id)
     {
         $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c JOIN users as u ON c.user_id = u.id WHERE c.pattern_id=?");
         $stmt->execute([$id]);
@@ -61,7 +61,7 @@ class Pattern extends Model
     //function to add a like to a pattern 
     public function postPatternLike(array $data)
     {
-        $stmt = $this->db->prepare("INSERT INTO likes (user_id, pattern_id) VALUES (?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO likes (pattern_id, user_id) VALUES (?, ?)");
         $result = $stmt->execute(array_values($data));
 
         return json_encode([
@@ -72,10 +72,10 @@ class Pattern extends Model
     //NEED TO MAKE THIS TAKE USER INTO ACCOUNT 
 
     //function to remove a like on a pattern 
-    public function removePatternLike(int $id)
+    public function removePatternLike(array $data)
     {
-        $stmt = $this->db->prepare("DELETE FROM likes WHERE pattern_id=?");
-        $result = $stmt->execute([$id]);
+        $stmt = $this->db->prepare("DELETE FROM likes WHERE pattern_id=? AND user_id=?");
+        $result = $stmt->execute(array_values($data));
 
         return json_encode([
             'pattern unliked' => $result
