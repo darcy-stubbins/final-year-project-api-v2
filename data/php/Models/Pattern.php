@@ -49,7 +49,7 @@ class Pattern extends Model
     //function to show comments on a pattern 
     public function getPatternComments(int $id)
     {
-        $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c JOIN users as u ON c.user_id = u.id WHERE c.pattern_id=?");
+        $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c LEFT JOIN users as u ON c.user_id = u.id WHERE c.pattern_id=?");
         $stmt->execute([$id]);
         $comments = $stmt->fetchAll();
 
@@ -85,7 +85,7 @@ class Pattern extends Model
     {
         $data['search_term'] = '%' . $data['search_term'] . '%';
         $stmt = $this->db->prepare("SELECT * FROM patterns WHERE pattern_name LIKE ?");
-        $result = $stmt->execute(array_values($data));
+        $stmt->execute(array_values($data));
         $searchResult = $stmt->fetchAll();
 
 
