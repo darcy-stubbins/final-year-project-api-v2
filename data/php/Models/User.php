@@ -77,4 +77,15 @@ class User extends Model
             'friend added' => $result
         ]);
     }
+
+    //creating friend functionality 
+    public function addFriend(array $data)
+    {
+        $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
+        $result = $stmt->execute(array_values($data));
+
+        return json_encode([
+            'friend addded' => $result
+        ]);
+    }
 }
