@@ -58,6 +58,17 @@ class Pattern extends Model
         );
     }
 
+    // public function getAllComments()
+    // {
+    //     $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c LEFT JOIN users as u ON c.user_id = u.id");
+    //     $stmt->execute();
+    //     $comments = $stmt->fetchAll();
+
+    //     return json_encode(
+    //         $comments
+    //     );
+    // }
+
     //function to add a like to a pattern 
     public function postPatternLike(array $data)
     {

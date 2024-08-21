@@ -24,7 +24,7 @@ class User extends Model
     //function to show a user by id 
     public function showUser(int $id)
     {
-        $stmt = $this->db->prepare("SELECT u.user_name, u.user_email, u.user_password FROM users as u WHERE id=?");
+        $stmt = $this->db->prepare("SELECT u.* FROM users as u WHERE id=?");
         $stmt->execute([$id]);
         $user = $stmt->fetch();
 
@@ -87,5 +87,19 @@ class User extends Model
         return json_encode([
             'friend addded' => $result
         ]);
+    }
+
+    //function to return the users list of friends 
+    public function getFriendsList(int $id)
+    {
+        $stmt = $this->db->prepare("SELECT u.* FROM users as u WHERE
+	        u.id IN (SELECT friend_id FROM friends WHERE user_id = ?) OR 
+	        u.id IN (SELECT user_id FROM friends WHERE friend_id = ?)");
+        $stmt->execute([$id, $id]);
+        $friends = $stmt->fetchAll();
+
+        return json_encode(
+            $friends
+        );
     }
 }
