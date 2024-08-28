@@ -95,10 +95,9 @@ class Pattern extends Model
     public function search(array $data)
     {
         $data['search_term'] = '%' . $data['search_term'] . '%';
-        $stmt = $this->db->prepare("SELECT * FROM patterns WHERE pattern_name LIKE ?");
+        $stmt = $this->db->prepare("SELECT p.*, u.user_name FROM patterns as p JOIN users as u ON p.user_id = u.id WHERE pattern_name LIKE ?");
         $stmt->execute(array_values($data));
         $searchResult = $stmt->fetchAll();
-
 
         return json_encode(
             $searchResult
