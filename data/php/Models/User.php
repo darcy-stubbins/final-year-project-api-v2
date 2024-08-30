@@ -47,19 +47,30 @@ class User extends Model
     //function to add a pattern into the saved table in the db 
     public function postSavePattern(array $data)
     {
-        $stmt = $this->db->prepare("INSERT INTO saved (user_id, pattern_id) VALUES (?, ?)");
-        $result = $stmt->execute(array_values($data));
+        $stmt = $this->db->prepare("SELECT * FROM saved as s WHERE s.user_id=? AND s.pattern_id=?");
+        $stmt->execute([$data['user_id'], $data['pattern_id']]);
+        $saved = $stmt->fetchAll();
+
+        if (empty($saved)) {
+            $stmt = $this->db->prepare("INSERT INTO saved (user_id, pattern_id) VALUES (?, ?)");
+            $message = 'pattern saved';
+        } else {
+            $stmt = $this->db->prepare("DELETE FROM saved WHERE user_id=? AND pattern_id=?");
+            $message = 'pattern unsaved';
+        }
+
+        $result = $stmt->execute([$data['user_id'], $data['pattern_id']]);
 
         return json_encode([
-            'pattern added' => $result
+            $message => $result
         ]);
     }
 
     //function to return list of users saved patterns 
     public function getSavedPatterns(int $id, array $data)
     {
-        $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path, u.user_name FROM patterns as p JOIN users as u ON u.id = p.user_id JOIN saved as s ON p.id = s.pattern_id WHERE s.user_id=?");
-        $stmt->execute([$id]);
+        $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path, u.user_name, CASE WHEN(SELECT pattern_id FROM saved WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS saved, CASE WHEN(SELECT pattern_id FROM likes WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS liked FROM patterns as p JOIN users as u ON u.id = p.user_id JOIN saved as s ON p.id = s.pattern_id WHERE s.user_id=?");
+        $stmt->execute([$id, $id, $id]);
         $saved = $stmt->fetchAll();
 
         return json_encode(
@@ -101,5 +112,10 @@ class User extends Model
         return json_encode(
             $friends
         );
+    }
+
+    public function postProfilePicture(array $data)
+    {
+
     }
 }

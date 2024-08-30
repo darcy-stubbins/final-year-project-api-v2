@@ -39,7 +39,7 @@ class Pattern extends Model
     public function postPatternComment(array $data)
     {
         $stmt = $this->db->prepare("INSERT INTO comments (pattern_id, user_id, comment_body) VALUES (?, ?, ?)");
-        $result = $stmt->execute(array_values($data));
+        $result = $stmt->execute([$data['pattern_id'], $data['user_id'], $data['comment_body']]);
 
         return json_encode([
             'comment addded' => $result
@@ -58,36 +58,25 @@ class Pattern extends Model
         );
     }
 
-    // public function getAllComments()
-    // {
-    //     $stmt = $this->db->prepare("SELECT c.*, u.user_name FROM comments as c LEFT JOIN users as u ON c.user_id = u.id");
-    //     $stmt->execute();
-    //     $comments = $stmt->fetchAll();
-
-    //     return json_encode(
-    //         $comments
-    //     );
-    // }
-
     //function to add a like to a pattern 
     public function postPatternLike(array $data)
     {
-        $stmt = $this->db->prepare("INSERT INTO likes (pattern_id, user_id) VALUES (?, ?)");
-        $result = $stmt->execute(array_values($data));
+        $stmt = $this->db->prepare("SELECT * FROM likes as l WHERE l.user_id=? AND l.pattern_id=?");
+        $stmt->execute([$data['user_id'], $data['pattern_id']]);
+        $likes = $stmt->fetchAll();
+
+        if (empty($likes)) {
+            $stmt = $this->db->prepare("INSERT INTO likes (user_id, pattern_id) VALUES (?, ?)");
+            $message = 'pattern liked';
+        } else {
+            $stmt = $this->db->prepare("DELETE FROM likes WHERE user_id=? AND pattern_id=?");
+            $message = 'pattern unliked';
+        }
+
+        $result = $stmt->execute([$data['user_id'], $data['pattern_id']]);
 
         return json_encode([
-            'pattern liked' => $result
-        ]);
-    }
-
-    //function to remove a like on a pattern 
-    public function removePatternLike(array $data)
-    {
-        $stmt = $this->db->prepare("DELETE FROM likes WHERE pattern_id=? AND user_id=?");
-        $result = $stmt->execute(array_values($data));
-
-        return json_encode([
-            'pattern unliked' => $result
+            $message => $result
         ]);
     }
 
@@ -95,8 +84,8 @@ class Pattern extends Model
     public function search(array $data)
     {
         $data['search_term'] = '%' . $data['search_term'] . '%';
-        $stmt = $this->db->prepare("SELECT p.*, u.user_name FROM patterns as p JOIN users as u ON p.user_id = u.id WHERE pattern_name LIKE ?");
-        $stmt->execute(array_values($data));
+        $stmt = $this->db->prepare("SELECT p.*, u.user_name, CASE WHEN(SELECT pattern_id FROM saved WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS saved, CASE WHEN(SELECT pattern_id FROM likes WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS liked FROM patterns as p JOIN users as u ON p.user_id = u.id WHERE pattern_name LIKE ?");
+        $stmt->execute([$data['user_id'], $data['user_id'], $data['search_term']]);
         $searchResult = $stmt->fetchAll();
 
         return json_encode(
