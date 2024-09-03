@@ -11,10 +11,10 @@ class User extends Model
     public function createUser(array $data)
     {
         //hashing the password 
-        $data['user_password'] = password_hash($data['user_password'], PASSWORD_DEFAULT);
+        $data['user_password'] = hash('sha256', $data['user_password']);
 
         $stmt = $this->db->prepare("INSERT INTO users (user_name, user_email, user_password) VALUES (?, ?, ?)");
-        $result = $stmt->execute(array_values($data));
+        $result = $stmt->execute([$data['user_name'], $data['user_email'], $data['user_password']]);
 
         return json_encode([
             'account added' => $result
@@ -22,10 +22,10 @@ class User extends Model
     }
 
     //function to show a user by id 
-    public function showUser(int $id)
+    public function showUser(array $data)
     {
         $stmt = $this->db->prepare("SELECT u.* FROM users as u WHERE id=?");
-        $stmt->execute([$id]);
+        $stmt->execute([$data['user_id']]);
         $user = $stmt->fetch();
 
         return json_encode(
@@ -67,10 +67,10 @@ class User extends Model
     }
 
     //function to return list of users saved patterns 
-    public function getSavedPatterns(int $id, array $data)
+    public function getSavedPatterns(array $data)
     {
         $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path, u.user_name, CASE WHEN(SELECT pattern_id FROM saved WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS saved, CASE WHEN(SELECT pattern_id FROM likes WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS liked FROM patterns as p JOIN users as u ON u.id = p.user_id JOIN saved as s ON p.id = s.pattern_id WHERE s.user_id=?");
-        $stmt->execute([$id, $id, $id]);
+        $stmt->execute([$data['user_id'], $data['user_id'], $data['user_id']]);
         $saved = $stmt->fetchAll();
 
         return json_encode(
@@ -101,12 +101,12 @@ class User extends Model
     }
 
     //function to return the users list of friends 
-    public function getFriendsList(int $id)
+    public function getFriendsList(array $data)
     {
         $stmt = $this->db->prepare("SELECT u.* FROM users as u WHERE
 	        u.id IN (SELECT friend_id FROM friends WHERE user_id = ?) OR 
 	        u.id IN (SELECT user_id FROM friends WHERE friend_id = ?)");
-        $stmt->execute([$id, $id]);
+        $stmt->execute([$data['user_id'], $data['user_id']]);
         $friends = $stmt->fetchAll();
 
         return json_encode(

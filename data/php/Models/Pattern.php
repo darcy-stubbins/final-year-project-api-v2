@@ -7,11 +7,6 @@ use Classes\Model;
 class Pattern extends Model
 {
 
-    public function test()
-    {
-        return 'im firing babyyyyyy';
-    }
-
     //function to add a pattern to the db 
     public function createPattern(array $data)
     {
@@ -42,7 +37,7 @@ class Pattern extends Model
         $result = $stmt->execute([$data['pattern_id'], $data['user_id'], $data['comment_body']]);
 
         return json_encode([
-            'comment addded' => $result
+            'comment added' => $result
         ]);
     }
 
