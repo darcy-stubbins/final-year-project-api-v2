@@ -3,7 +3,6 @@
 namespace Models;
 
 use Classes\Model;
-use PDO;
 
 class User extends Model
 {
@@ -17,7 +16,8 @@ class User extends Model
         $result = $stmt->execute([$data['user_name'], $data['user_email'], $data['user_password']]);
 
         return json_encode([
-            'account added' => $result
+            'success' => true,
+            'message' => 'user created'
         ]);
     }
 
@@ -40,7 +40,8 @@ class User extends Model
         $result = $stmt->execute(array_values($data));
 
         return json_encode([
-            'account deleted' => $result
+            'success' => true,
+            'message' => 'user deleted'
         ]);
     }
 
@@ -62,12 +63,13 @@ class User extends Model
         $result = $stmt->execute([$data['user_id'], $data['pattern_id']]);
 
         return json_encode([
-            $message => $result
+            'success' => $result,
+            'message' => $message
         ]);
     }
 
     //function to return list of users saved patterns 
-    public function getSavedPatterns(array $data)
+    public function getSavedPatterns($data)
     {
         $stmt = $this->db->prepare("SELECT p.id, p.pattern_name, p.pdf_path, u.user_name, CASE WHEN(SELECT pattern_id FROM saved WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS saved, CASE WHEN(SELECT pattern_id FROM likes WHERE user_id = ? AND pattern_id = p.id) IS NULL THEN 0 ELSE 1 END AS liked FROM patterns as p JOIN users as u ON u.id = p.user_id JOIN saved as s ON p.id = s.pattern_id WHERE s.user_id=?");
         $stmt->execute([$data['user_id'], $data['user_id'], $data['user_id']]);
@@ -78,25 +80,26 @@ class User extends Model
         );
     }
 
-    //function to add a friend 
-    public function postUserFriend(array $data)
-    {
-        $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
-        $result = $stmt->execute(array_values($data));
-
-        return json_encode([
-            'friend added' => $result
-        ]);
-    }
-
     //creating friend functionality 
     public function addFriend(array $data)
     {
-        $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
-        $result = $stmt->execute(array_values($data));
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE user_name LIKE ?");
+        $stmt->execute([$data['friend_request']]);
+        $friend = $stmt->fetch();
+
+        if ($friend) {
+            $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
+            $result = $stmt->execute([$friend['id'], $data['user_id']]);
+
+            return json_encode([
+                'success' => true,
+                'message' => 'friend added'
+            ]);
+        }
 
         return json_encode([
-            'friend addded' => $result
+            'success' => false,
+            'message' => 'friend not found'
         ]);
     }
 
@@ -112,10 +115,5 @@ class User extends Model
         return json_encode(
             $friends
         );
-    }
-
-    public function postProfilePicture(array $data)
-    {
-
     }
 }

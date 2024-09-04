@@ -12,6 +12,7 @@ class LoginService
     }
 
 
+    //function to login a user and assign them a token that will be used to approve anything they do within the app
     public function login(array $data)
     {
         $data['user_password'] = hash('sha256', $data['user_password']);
@@ -33,6 +34,17 @@ class LoginService
                 'message' => 'Username or passowrd is incorrect'
             ]);
         }
+    }
+
+    //function to logout the current user and clear their currently set token in the db 
+    public function logout(array $data)
+    {
+        $stmt = $this->model->db->prepare("UPDATE users SET token_expiry = NOW() WHERE token = ?");
+        $stmt->execute($data['token']);
+
+        return json_encode([
+            'success' => true,
+        ]);
     }
 
 

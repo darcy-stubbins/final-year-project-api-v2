@@ -14,20 +14,9 @@ class Pattern extends Model
         $result = $stmt->execute(array_values($data));
 
         return json_encode([
-            'pattern added' => $result
+            'success' => true,
+            'message' => 'pattern added'
         ]);
-    }
-
-    //function to show all patterns in the db 
-    public function showAllPatterns()
-    {
-        $stmt = $this->db->prepare("SELECT p.*, u.user_name FROM patterns as p JOIN users as u ON p.user_id = u.id");
-        $stmt->execute();
-        $pattern = $stmt->fetchAll();
-
-        return json_encode(
-            $pattern
-        );
     }
 
     //function to add comments to a pattern 
@@ -37,7 +26,8 @@ class Pattern extends Model
         $result = $stmt->execute([$data['pattern_id'], $data['user_id'], $data['comment_body']]);
 
         return json_encode([
-            'comment added' => $result
+            'success' => true,
+            'message' => 'comment added'
         ]);
     }
 
