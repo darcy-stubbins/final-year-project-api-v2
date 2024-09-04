@@ -11,7 +11,7 @@ class Pattern extends Model
     public function createPattern(array $data)
     {
         $stmt = $this->db->prepare("INSERT INTO patterns (pattern_name, user_id, pdf_path) VALUES (?, ?, ?)");
-        $stmt->execute(array_values($data));
+        $result = $stmt->execute(array_values($data));
 
         return json_encode([
             'success' => true,
@@ -23,7 +23,7 @@ class Pattern extends Model
     public function postPatternComment(array $data)
     {
         $stmt = $this->db->prepare("INSERT INTO comments (pattern_id, user_id, comment_body) VALUES (?, ?, ?)");
-        $stmt->execute([$data['pattern_id'], $data['user_id'], $data['comment_body']]);
+        $result = $stmt->execute([$data['pattern_id'], $data['user_id'], $data['comment_body']]);
 
         return json_encode([
             'success' => true,

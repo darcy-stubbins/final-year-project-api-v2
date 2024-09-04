@@ -13,7 +13,7 @@ class User extends Model
         $data['user_password'] = hash('sha256', $data['user_password']);
 
         $stmt = $this->db->prepare("INSERT INTO users (user_name, user_email, user_password) VALUES (?, ?, ?)");
-        $stmt->execute([$data['user_name'], $data['user_email'], $data['user_password']]);
+        $result = $stmt->execute([$data['user_name'], $data['user_email'], $data['user_password']]);
 
         return json_encode([
             'success' => true,
@@ -37,23 +37,11 @@ class User extends Model
     public function deleteUser(array $data)
     {
         $stmt = $this->db->prepare("DELETE FROM users WHERE id=?");
-        $stmt->execute(array_values($data));
+        $result = $stmt->execute(array_values($data));
 
         return json_encode([
             'success' => true,
             'message' => 'user deleted'
-        ]);
-    }
-
-    //function to update the users user_name in the db 
-    public function updateUserName(array $data)
-    {
-        $stmt = $this->db->prepare("UPDATE users SET user_name=? WHERE id = ?");
-        $stmt->execute([$data['update_name'], $data['user_id']]);
-
-        return json_encode([
-            'success' => true,
-            'message' => 'name changed'
         ]);
     }
 
@@ -101,7 +89,7 @@ class User extends Model
 
         if ($friend) {
             $stmt = $this->db->prepare("INSERT INTO friends (friend_id, user_id) VALUES (?, ?)");
-            $stmt->execute([$friend['id'], $data['user_id']]);
+            $result = $stmt->execute([$friend['id'], $data['user_id']]);
 
             return json_encode([
                 'success' => true,
