@@ -29,7 +29,6 @@ Linux, Mac and Windows
 ## Dependencies  
 
 * Docker to run the containers, read more and download [here](https://www.docker.com/products/docker-desktop/).
-* Meow SQL to view and run the database creation queries, read more and download [here](https://appimage.github.io/MeowSQL/).
 * Android SDK to run the Flutter Emulator (only required if running the Flutter app along with this API), read more and download [here](https://developer.android.com/studio/install?gad_source=1&gclid=Cj0KCQjw28W2BhC7ARIsAPerrcLG96yx9NzG_xwg0tyV3cFF3MwA9PRpBaV84sWI2VznmkeC0HqPjpgaAuziEALw_wcB&gclsrc=aw.ds).
 
 ## Installation 
@@ -39,14 +38,19 @@ __To run the API through terminal:__
 ```
 ./init-letsencrypt.sh 
 ```
-And once prompted continue by entering:
+And once prompted by the following message:
+```
+Existing data found for crafting-app.com. Continue and replace existing certificate? (y/N)
+```
+
+continue by entering:
 ```
 Y 
 ```
 
-__To set up the database tables, run the following query in MeowSQL:__
+The following queries can be run through a database admin tool (such as MeowSQL or Heidi), or through the crafting-app-api-db-1 container through Docker. All the database credentials can be found in docker-compose.yml
 
-_Please note: you may need to close and re-open Meow SQL after running the following query before seeing any tables._
+__To set up the database tables, run the following query:__
 
 ```
 CREATE TABLE `users` (
@@ -96,7 +100,7 @@ CREATE TABLE `comments` (
 );
 
 ```
-__To populate the database tables with 'dummy' information, run the following query in MeowSQL:__
+__To populate the database tables with 'dummy' information, run the following query:__
 
 ```
 INSERT INTO users (user_name, user_email, user_password)
